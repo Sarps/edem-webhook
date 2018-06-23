@@ -2,7 +2,7 @@
   "name": "node-soap-example",
   "version": "1.0.0",
   "description": "A simple SOAP Server and Client using Node.js, express and node-soap (https://github.com/vpulim/node-soap)",
-  "main": "app0.js",
+  "main": "app.js",
   "scripts": {
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"

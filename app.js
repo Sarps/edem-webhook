@@ -14,36 +14,45 @@ server.use(bodyParser.json());
 
 server.post('/get-fx-rate', (req, res) => {
 
-    const movieToSearch = req.body.result && req.body.result.parameters && req.body.result.parameters.movie ? req.body.result.parameters.movie : 'The Godfather';
-    const reqUrl = encodeURI(`http://www.amdoren.com/?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${movieToSearch}&to=${API_KEY}`);
-    var options = {
-      "method": "GET",
-      "hostname": "www.amdoren.com",
-      "port": null,
-      "path": "/api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=USD&to=EUR",
-      "headers": {
-        "cache-control": "no-cache",
-        "postman-token": "0cb322cd-efc1-7515-b414-131c374bed9e"
+    if( !req.body.queryResult || !req.body.queryResult.parameters) {
+      return res.json({
+        err: "Error"
+      })
+    }
+    const parameters = req.body.result.parameters,
+          c_from = parameters["currency-from"] || 'USD',
+          c_to = parameters["currency-to"] || 'GHS',
+          amount = parameters["amount"] || 1,
+          reqUrl = encodeURI(`http://www.amdoren.com/?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`);
+    
+    http.get(reqUrl, 
+      (res) => {
+          let completeResponse = '';
+
+          res.on('data', (chunk) => {
+              completeResponse += chunk;
+          });
+
+          res.on('end', () => {
+
+              const resp = JSON.parse(completeResponse);
+              let dataToSend += `${resp.amount * amount}`;
+
+              return res.json({
+                  speech: dataToSend,
+                  displayText: dataToSend,
+                  source: 'get-movie-details'
+              });
+
+          });
+      }, 
+      (error) => {
+          return res.json({
+              speech: 'Something went wrong!',
+              displayText: 'Something went wrong!',
+              source: 'get-movie-details'
+          });
       }
-    };
-
-    var req = http.request(options, function (res) {
-      var chunks = [];
-
-      res.on("data", function (chunk) {
-        chunks.push(chunk);
-      });
-
-      res.on("end", function () {
-        var body = Buffer.concat(chunks);
-        const result = JSON.parse(body.toString());
-
-        return res.json({
-          speech: dataToSend,
-          displayText: dataToSend
-        })
-      });
-
-    });
+    );
 
 });
