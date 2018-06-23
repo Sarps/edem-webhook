@@ -3,7 +3,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const http = require('http');
+const http = require('https');
 
 const server = express();
 server.use(bodyParser.urlencoded({
@@ -23,18 +23,20 @@ server.post('/get-fx-rate', (req, res) => {
           c_from = parameters["currency-from"] || 'USD',
           c_to = parameters["currency-to"] || 'GHS',
           amount = parameters["amount"] || 1,
-          reqUrl = encodeURI(`http://www.amdoren.com/?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`);
+          reqUrl = `https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`;
     
     http.get(reqUrl, 
-      (res) => {
+      (t_res) => {
           var chunks = [];
 
-          res.on("data", function (chunk) {
+          t_res.on("data", function (chunk) {
             chunks.push(chunk);
           });
 
-          res.on('end', () => {
+          t_res.on('end', () => {
 
+            var body = Buffer.concat(chunks);
+            console.log(body.toString())
             const resp = JSON.parse(body.toString());
             let dataToSend = `${resp.amount * amount}`;
 
