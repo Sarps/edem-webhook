@@ -1,5 +1,5 @@
 
-console.log(util.format('%s:%s', 'foo'));
+//console.log(util.format('%s:%s', 'foo'));
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -14,12 +14,12 @@ server.use(bodyParser.json());
 
 server.post('/get-fx-rate', (req, res) => {
 
-    if( !req.body.queryResult || !req.body.queryResult.parameters) {
+    if( !(req.body.queryResult && req.body.queryResult.parameters) ) {
       return res.json({
         err: "Error"
       })
     }
-    const parameters = req.body.result.parameters,
+    const parameters = req.body.queryResult.parameters,
           c_from = parameters["currency-from"] || 'USD',
           c_to = parameters["currency-to"] || 'GHS',
           amount = parameters["amount"] || 1,
@@ -27,30 +27,28 @@ server.post('/get-fx-rate', (req, res) => {
     
     http.get(reqUrl, 
       (res) => {
-          let completeResponse = '';
+          var chunks = [];
 
-          res.on('data', (chunk) => {
-              completeResponse += chunk;
+          res.on("data", function (chunk) {
+            chunks.push(chunk);
           });
 
           res.on('end', () => {
 
-              const resp = JSON.parse(completeResponse);
-              let dataToSend += `${resp.amount * amount}`;
+            const resp = JSON.parse(body.toString());
+            let dataToSend = `${resp.amount * amount}`;
 
-              return res.json({
-                  speech: dataToSend,
-                  displayText: dataToSend,
-                  source: 'get-movie-details'
-              });
+            return res.json({
+              speech: dataToSend,
+              displayText: dataToSend
+            });
 
           });
       }, 
       (error) => {
           return res.json({
               speech: 'Something went wrong!',
-              displayText: 'Something went wrong!',
-              source: 'get-movie-details'
+              displayText: 'Something went wrong!'
           });
       }
     );
