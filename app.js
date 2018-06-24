@@ -1,5 +1,4 @@
 
-//console.log(util.format('%s:%s', 'foo'));
 const util = require('util');
 const request = require('request')
 const {WebhookClient} = require('dialogflow-fulfillment');
@@ -19,7 +18,7 @@ server.post('/', (req, res) => {
 
     let intents = new Map();
     intents.set('account.balance.check', fallback);
-    intents.set('currency.convert', testFx);
+    intents.set('currency.convert', fallback);
     intents.set('account.spending.check', fallback);
     intents.set('transfer.money', fallback);
     agent.handleRequest(intents);
@@ -38,7 +37,7 @@ server.post('/', (req, res) => {
           agent.add(`Value is ${body.amount * amount}`);
         }
       )
-      
+  
     }
     
     function fallback(agent) {
