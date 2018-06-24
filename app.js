@@ -15,7 +15,7 @@ server.use(bodyParser.json());
 
 server.post('/', (req, res) => {
 
-  const agent = new WebhookClient({ req, res });
+  const agent = new WebhookClient({ request: req, response: res });
 
     let intents = new Map();
     intents.set('account.balance.check', fallback);
@@ -32,12 +32,12 @@ server.post('/', (req, res) => {
         amount = parameters["amount"] || 1;
 
       request
-      .get(`https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`)
-      .on('response', function(response) {
-        const resp = JSON.parse(reponse.body.toString());
-        let value = `${resp.amount * amount}`;
-        agent.add(value);
-      })
+      .get(`https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`,
+        function(error, response, body) {
+          let value = `${body.amount * amount}`;
+          agent.add(value);
+        }
+      )
       
     }
     
