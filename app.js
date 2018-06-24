@@ -34,8 +34,8 @@ server.post('/', (req, res) => {
       request
       .get(`https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`,
         function(error, response, body) {
-          let value = `${body.amount * amount}`;
-          agent.add(value);
+          body = JSON.parse(body);
+          agent.add(`Value is ${body.amount * amount}`);
         }
       )
       
