@@ -1,6 +1,7 @@
 
 const util = require('util');
-const request = require('request')
+const request = require('sync-request');
+//const request = require('request')
 const {WebhookClient} = require('dialogflow-fulfillment');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -14,11 +15,11 @@ server.use(bodyParser.json());
 
 server.post('/', (req, res) => {
 
-  const agent = new WebhookClient({ request: req, response: res });
+  var agent = new WebhookClient({ request: req, response: res });
 
     let intents = new Map();
     intents.set('account.balance.check', fallback);
-    intents.set('currency.convert', fallback);
+    intents.set('currency.convert', testFx);
     intents.set('account.spending.check', fallback);
     intents.set('transfer.money', fallback);
     agent.handleRequest(intents);
@@ -30,13 +31,19 @@ server.post('/', (req, res) => {
         c_to = parameters["currency-to"] || 'GHS',
         amount = parameters["amount"] || 1;
 
-      request
+      var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`);
+      body = JSON.parse(res.getBody('utf8'));
+      agent.add(`Value is ${body.amount * amount}`);
+
+
+      /*request
       .get(`https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`,
         function(error, response, body) {
           body = JSON.parse(body);
-          agent.add(`Value is ${body.amount * amount}`);
+          agent.add(`I'm sorry, api not hooked up yet.`);
+          //agent.add(`Value is ${body.amount * amount}`);
         }
-      )
+      )*/
   
     }
     
