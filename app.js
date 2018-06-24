@@ -33,7 +33,10 @@ server.post('/', (req, res) => {
 
       var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`);
       body = JSON.parse(res.getBody('utf8'));
-      agent.add(`Value is ${body.amount * amount}`);
+      //console.log(req.body.queryResult.fulfillmentText);
+      agent.add(
+        util.format(req.body.queryResult.fulfillmentText, Math.round(body.amount * amount))
+      );
 
 
       /*request
