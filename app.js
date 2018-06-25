@@ -31,7 +31,7 @@ server.post('/', (req, res) => {
         c_to = parameters["currency-to"] || 'GHS',
         amount = parameters["amount"] || 1;
 
-      var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`);
+      var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=b2DQSdiwKcnKcCRv654crbEsFwdPX8&from=${c_from}&to=${c_to}`);
       body = JSON.parse(res.getBody('utf8'));
       //console.log(req.body.queryResult.fulfillmentText);
       agent.add(
