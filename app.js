@@ -4,6 +4,7 @@ const soap = require('soap');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const express = require('express');
 const bodyParser = require('body-parser');
+const moment = require('moment');
 
 const server = express();
 server.use(bodyParser.urlencoded({
@@ -60,6 +61,7 @@ server.post('/', (req, res) => {
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+\/\d+\/\d+\s+\d+:\d+:\d+ \w+/g)[0];
+            date = moment(date, "DD-MM-YYYY");
             return resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (arr[1] * amount).toFixed(2))
             );
@@ -79,6 +81,7 @@ server.post('/', (req, res) => {
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+\/\d+\/\d+\s+\d+:\d+:\d+ \w+/g)[0];
+            date = moment(date, "DD-MM-YYYY");
             resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (1/arr[1] * amount).toFixed(2))
             );
