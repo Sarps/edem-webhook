@@ -61,7 +61,7 @@ server.post('/', (req, res) => {
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+/g);
-            date = `${date[1]}-${date[0]}-${date[2]}`
+            date = moment(`${date[2]}-${date[0]}-${date[1]}`).format("Do MMM, YYYY");
             return resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (arr[1] * amount).toFixed(2))
             );
@@ -81,8 +81,7 @@ server.post('/', (req, res) => {
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+/g);
-            console.log("date", date);
-            date = `${date[1]}-${date[0]}-${date[2]}`
+            date = moment(`${date[2]}-${date[0]}-${date[1]}`).format("Do MMM, YYYY");
             resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (1/arr[1] * amount).toFixed(2))
             );
