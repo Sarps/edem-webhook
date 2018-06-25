@@ -35,7 +35,7 @@ server.post('/', (req, res) => {
       body = JSON.parse(res.getBody('utf8'));
       //console.log(req.body.queryResult.fulfillmentText);
       agent.add(
-        util.format(req.body.queryResult.fulfillmentText, Math.round(body.amount * amount))
+        util.format(req.body.queryResult.fulfillmentText, (body.amount * amount).toFixed(2))
       );
 
 
