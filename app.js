@@ -38,20 +38,6 @@ server.post('/', (req, res) => {
       agent.handleRequest(intents);
     });
 
-    function testFx() {
-
-      const parameters = req.body.queryResult.parameters,
-        c_from = parameters["currency-from"] || 'USD',
-        c_to = parameters["currency-to"] || 'GHS',
-        amount = parameters["amount"] || 1;
-
-      var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=b2DQSdiwKcnKcCRv654crbEsFwdPX8&from=${c_from}&to=${c_to}`);
-      body = JSON.parse(res.getBody('utf8'));
-      agent.add(
-        util.format(req.body.queryResult.fulfillmentText, (body.amount * amount).toFixed(2))
-      );
-    }
-
     function getFXRate(agent) {  
       return fx(agent)
         .then ( amount => agent.add(amount) )
@@ -66,12 +52,11 @@ server.post('/', (req, res) => {
       var fixed = agent.parameters['currency-from'],
           variable = agent.parameters['currency-to'],
           amount = agent.parameters.amount || 1;
-      console.log(fixed.parameters);
       client.GetFXRate({
         fixedCurrency: fixed,
         varCurrency: variable
       }, function(err, result, rawResponse, soapHeader, rawRequest){
-          if(err) return;
+          if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             resolve (
@@ -87,7 +72,7 @@ server.post('/', (req, res) => {
         fixedCurrency: fixed,
         varCurrency: variable
       }, function(err, result, rawResponse, soapHeader, rawRequest){
-          if(err) return;
+          if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             resolve (
@@ -95,7 +80,7 @@ server.post('/', (req, res) => {
             );
           }
           else
-            reject (`There is no data available for convertion on ${variable} and ${fixed}`);
+            resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
       })
     });
 
