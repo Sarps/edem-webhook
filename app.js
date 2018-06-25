@@ -60,7 +60,7 @@ server.post('/', (req, res) => {
           if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
-            var date = arr[0].match(/\d+\/\d+\/\d+\s+\d+:\d+:\d+ \w+/g)[0];
+            var date = arr[0].match(/\d+\/\d+\/\d/g)[0];
             date = moment(date, "DD-MM-YYYY");
             return resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (arr[1] * amount).toFixed(2))
@@ -80,7 +80,7 @@ server.post('/', (req, res) => {
           if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
-            var date = arr[0].match(/\d+\/\d+\/\d+\s+\d+:\d+:\d+ \w+/g)[0];
+            var date = arr[0].match(/\d+\/\d+\/\d+/g)[0];
             date = moment(date, "DD-MM-YYYY");
             resolve (
               util.format(req.body.queryResult.fulfillmentText, date, (1/arr[1] * amount).toFixed(2))
