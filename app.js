@@ -18,10 +18,10 @@ server.post('/', (req, res) => {
   var agent = new WebhookClient({ request: req, response: res });
 
     let intents = new Map();
-    intents.set('account.balance.check', fallback);
+    //intents.set('account.balance.check', fallback);
     intents.set('currency.convert', testFx);
-    intents.set('account.spending.check', fallback);
-    intents.set('transfer.money', fallback);
+    /*intents.set('account.spending.check', fallback);
+    intents.set('transfer.money', fallback);*/
     agent.handleRequest(intents);
 
     function testFx() {
