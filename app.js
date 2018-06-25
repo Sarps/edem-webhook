@@ -1,7 +1,6 @@
 
 const util = require('util');
-const request = require('sync-request');
-//const request = require('request')
+const soap = require('soap');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -11,18 +10,33 @@ server.use(bodyParser.urlencoded({
     extended: true
 }));
 
+
 server.use(bodyParser.json());
 
 server.post('/', (req, res) => {
 
-  var agent = new WebhookClient({ request: req, response: res });
+    var agent = new WebhookClient({ request: req, response: res });
+    global.client = null;
 
-    let intents = new Map();
-    //intents.set('account.balance.check', fallback);
-    intents.set('currency.convert', testFx);
-    /*intents.set('account.spending.check', fallback);
-    intents.set('transfer.money', fallback);*/
-    agent.handleRequest(intents);
+    var url = './GetFXRate.xml';
+    soap.createClient(url, function(err, g_client) {
+      if(!g_client) {
+        return console.log(err);
+      }
+      client = g_client;
+      client.setEndpoint('https://citmobile.stanbicbank.com.gh/citwebservice/GetFXRate')
+      client.setSecurity(new soap.ClientSSLSecurityPFX(
+          './citmobile.stanbicbank.com.gh-Jeff.pfx',
+          'Fr33W!lly',
+          { rejectUnauthorized: false }
+      ));
+      let intents = new Map();
+      intents.set('currency.convert', getFXRate);
+      /*intents.set('account.balance.check', fallback);
+      intents.set('account.spending.check', fallback);
+      intents.set('transfer.money', fallback);*/
+      agent.handleRequest(intents);
+    });
 
     function testFx() {
 
@@ -33,26 +47,57 @@ server.post('/', (req, res) => {
 
       var res = request('GET', `https://www.amdoren.com//api/currency.php?api_key=b2DQSdiwKcnKcCRv654crbEsFwdPX8&from=${c_from}&to=${c_to}`);
       body = JSON.parse(res.getBody('utf8'));
-      //console.log(req.body.queryResult.fulfillmentText);
       agent.add(
         util.format(req.body.queryResult.fulfillmentText, (body.amount * amount).toFixed(2))
       );
+    }
 
-
-      /*request
-      .get(`https://www.amdoren.com//api/currency.php?api_key=8v3VvUXYeEGniBPuANKHbqxp5tRV2v&from=${c_from}&to=${c_to}`,
-        function(error, response, body) {
-          body = JSON.parse(body);
-          agent.add(`I'm sorry, api not hooked up yet.`);
-          //agent.add(`Value is ${body.amount * amount}`);
-        }
-      )*/
-  
+    function getFXRate(agent) {  
+      return fx(agent)
+        .then ( amount => agent.add(amount) )
+        .catch( error => agent.add(error) )
     }
     
     function fallback(agent) {
       agent.add(`I'm sorry, api not hooked up yet.`);
     }
+
+    var fx = (agent) => new Promise((resolve, reject) => {
+      var fixed = agent.parameters['currency-from'],
+          variable = agent.parameters['currency-to'],
+          amount = agent.parameters.amount || 1;
+      console.log(fixed.parameters);
+      client.GetFXRate({
+        fixedCurrency: fixed,
+        varCurrency: variable
+      }, function(err, result, rawResponse, soapHeader, rawRequest){
+          if(err) return;
+          var arr = result.GetFXRateResult.split("=");
+          if(arr && arr.length > 1) {
+            resolve (
+              util.format(req.body.queryResult.fulfillmentText, (arr[1] * amount).toFixed(2))
+            );
+          }
+          reverse_fx(variable, fixed, amount);
+      })
+    });
+
+    var reverse_fx = (fixed, variable, amount) => new Promise((resolve, reject) => {
+      client.GetFXRate({
+        fixedCurrency: fixed,
+        varCurrency: variable
+      }, function(err, result, rawResponse, soapHeader, rawRequest){
+          if(err) return;
+          var arr = result.GetFXRateResult.split("=");
+          if(arr && arr.length > 1) {
+            resolve (
+              util.format(req.body.queryResult.fulfillmentText, (1/arr[1] * amount).toFixed(2))
+            );
+          }
+          else
+            reject (`There is no data available for convertion on ${variable} and ${fixed}`);
+      })
+    });
 
 });
 
@@ -60,3 +105,51 @@ server.listen((process.env.PORT || 8000), () => {
     console.log("Server is up and running...");
 });
 
+function checkBalance(cb) {
+  client.AccountDetails({accountNumber: '9040007003492'}, function(err, result, rawResponse, soapHeader, rawRequest) {
+      console.log(err);
+      console.log(rawResponse);
+      cb(result);
+  })
+}
+
+function transfer(amount, accountNumber) {
+  
+}
+
+function transactionDetails() {
+  client.LoadTransactionDetailsMCD({
+    UserName: "USD",
+    IMEI: "GHS",
+    AccountNo: '87498798275894',
+    Amount: '500.00',
+    TranTimeStamp: '76737827',
+    SIMSerialNumber: '87498798275894',
+  }, function(err, result, rawResponse, soapHeader, rawRequest){
+      console.log(err);
+      console.log(rawResponse);
+      cb(result);
+  })
+}
+
+function allHistory() {
+  client.LoadTransactionsRTC({
+    UserName: "USD",
+    IMEI: "GHS",
+    SIMSerialNumber: '87498798275894'
+  }, function(err, result, rawResponse, soapHeader, rawRequest){
+      console.log(err);
+      console.log(rawResponse);
+      cb(result);
+  })
+}
+
+function fx(fixed, variable, cb) {
+  client.GetFXRate({
+    fixedCurrency: "USD",
+    varCurrency: "GHS"
+  }, function(err, result, rawResponse, soapHeader, rawRequest){
+      if(err) return;
+      cb(result);
+  })
+}
