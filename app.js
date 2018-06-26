@@ -1,5 +1,5 @@
 
-const util = require('util');
+const format = require('string-template');
 const soap = require('soap');
 const {WebhookClient} = require('dialogflow-fulfillment');
 const express = require('express');
@@ -63,7 +63,10 @@ server.post('/', (req, res) => {
             var date = arr[0].match(/\d+/g);
             date = moment(`${date[2]}-${date[0]}-${date[1]}`).format("Do MMMM YYYY");
             return resolve (
-              util.format(req.body.queryResult.fulfillmentText, date, (arr[1] * amount).toFixed(2))
+              format(req.body.queryResult.fulfillmentText, {
+                date, 
+                amount: (arr[1] * amount).toFixed(2)
+              })
             );
           }
           return reverse_fx(variable, fixed, amount)
@@ -83,7 +86,10 @@ server.post('/', (req, res) => {
             var date = arr[0].match(/\d+/g);
             date = moment(`${date[2]}-${date[0]}-${date[1]}`).format("Do MMMM YYYY");
             resolve (
-              util.format(req.body.queryResult.fulfillmentText, date, (1/arr[1] * amount).toFixed(2))
+              format(req.body.queryResult.fulfillmentText, {
+                date, 
+                amount: (arr[1] * amount).toFixed(2)
+              })
             );
           }
           else
@@ -96,52 +102,3 @@ server.post('/', (req, res) => {
 server.listen((process.env.PORT || 8000), () => {
     console.log("Server is up and running...");
 });
-
-function checkBalance(cb) {
-  client.AccountDetails({accountNumber: '9040007003492'}, function(err, result, rawResponse, soapHeader, rawRequest) {
-      console.log(err);
-      console.log(rawResponse);
-      cb(result);
-  })
-}
-
-function transfer(amount, accountNumber) {
-  
-}
-
-function transactionDetails() {
-  client.LoadTransactionDetailsMCD({
-    UserName: "USD",
-    IMEI: "GHS",
-    AccountNo: '87498798275894',
-    Amount: '500.00',
-    TranTimeStamp: '76737827',
-    SIMSerialNumber: '87498798275894',
-  }, function(err, result, rawResponse, soapHeader, rawRequest){
-      console.log(err);
-      console.log(rawResponse);
-      cb(result);
-  })
-}
-
-function allHistory() {
-  client.LoadTransactionsRTC({
-    UserName: "USD",
-    IMEI: "GHS",
-    SIMSerialNumber: '87498798275894'
-  }, function(err, result, rawResponse, soapHeader, rawRequest){
-      console.log(err);
-      console.log(rawResponse);
-      cb(result);
-  })
-}
-
-function fx(fixed, variable, cb) {
-  client.GetFXRate({
-    fixedCurrency: "USD",
-    varCurrency: "GHS"
-  }, function(err, result, rawResponse, soapHeader, rawRequest){
-      if(err) return;
-      cb(result);
-  })
-}
