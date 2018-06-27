@@ -57,7 +57,7 @@ server.post('/', (req, res) => {
         fixedCurrency: fixed,
         varCurrency: variable
       }, function(err, result, rawResponse, soapHeader, rawRequest){
-          if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
+          if(err) return resolve (`There is no data available for convertion from ${variable} to ${fixed}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+/g);
@@ -80,7 +80,7 @@ server.post('/', (req, res) => {
         fixedCurrency: fixed,
         varCurrency: variable
       }, function(err, result, rawResponse, soapHeader, rawRequest){
-          if(err) return resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
+          if(err) return resolve (`There is no data available for convertion from ${fixed} to ${variable}`);
           var arr = result.GetFXRateResult.split("=");
           if(arr && arr.length > 1) {
             var date = arr[0].match(/\d+/g);
@@ -88,12 +88,12 @@ server.post('/', (req, res) => {
             resolve (
               format(req.body.queryResult.fulfillmentText, {
                 date, 
-                amount: (arr[1] * amount).toFixed(2)
+                amount: (1/arr[1] * amount).toFixed(2)
               })
             );
           }
           else
-            resolve (`There is no data available for convertion on ${variable} and ${fixed}`);
+            resolve (`There is no data available for convertion from ${variable} to ${fixed}`);
       })
     });
 
