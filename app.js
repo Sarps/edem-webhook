@@ -50,9 +50,9 @@ server.post('/', (req, res) => {
     }
 
     var fx = (agent) => new Promise((resolve, reject) => {
-      var fixed = agent.parameters['currency-from'],
-          variable = agent.parameters['currency-to'],
-          amount = agent.parameters.amount || 1;
+      var fixed = agent.parameters['from']['currency'],
+          variable = agent.parameters['to'],
+          amount =agent.parameters['from']['amount'] || 1;
       client.GetFXRate({
         fixedCurrency: fixed,
         varCurrency: variable
