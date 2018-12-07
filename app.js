@@ -25,12 +25,6 @@ server.post('/', (req, res) => {
         return console.log(err);
       }
       client = g_client;
-      client.setEndpoint('https://citmobile.stanbicbank.com.gh/citwebservice/GetFXRate')
-      client.setSecurity(new soap.ClientSSLSecurityPFX(
-          './citmobile.stanbicbank.com.gh-Jeff.pfx',
-          'Fr33W!lly',
-          { rejectUnauthorized: false }
-      ));
       let intents = new Map();
       intents.set('currency.convert', getFXRate);
       /*intents.set('account.balance.check', fallback);
